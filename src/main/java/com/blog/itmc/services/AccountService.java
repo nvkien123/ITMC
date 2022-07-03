@@ -16,11 +16,11 @@ import java.util.Optional;
 @Service
 public class AccountService {
     @Autowired
-    AccountRepo accountRepo;
+    private AccountRepo accountRepo;
     @Autowired
-    MemberRepo memberRepo;
+    private MemberRepo memberRepo;
     @Autowired
-    RoleRepo roleRepo;
+    private RoleRepo roleRepo;
 
     public List<Account> getAll() {
         return accountRepo.findAll();
@@ -50,5 +50,17 @@ public class AccountService {
         Role role = roleRepo.findByName("Blogger").get();
         account.setRoleId(role.getId());
         return accountRepo.save(account);
+    }
+
+    public Account update(Account account) {
+        String username = account.getUsername();
+        Account accFound = this.getById(username);
+        accFound.setPassword(account.getPassword() != null ? account.getPassword() : accFound.getPassword());
+        if (account.getRoleId() != 0) {
+            int roleId = account.getRoleId();
+            Role role = roleRepo.findById(roleId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy role!"));
+            accFound.setRoleId(roleId);
+        }
+        return accountRepo.save(accFound);
     }
 }
