@@ -10,16 +10,24 @@ import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/account")
 public class AccountController {
     @Autowired
     private AccountService accountService;
-    @GetMapping("/account")
+    @GetMapping("")
     public List<Account> findAll() {
         return accountService.getAll();
     }
-    @PostMapping("/")
+    @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Account account) {
         return ResponseEntity.ok(accountService.register(account));
+    }
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Account account) {
+        return ResponseEntity.ok(accountService.login(account));
+    }
+    @PutMapping("/update")
+    public ResponseEntity<?> update(@RequestBody Account account) {
+        return ResponseEntity.ok(accountService.update(account));
     }
 }
