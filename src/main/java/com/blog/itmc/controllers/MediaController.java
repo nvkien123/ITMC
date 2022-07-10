@@ -1,4 +1,4 @@
-package com.blog.itmc.controller;
+package com.blog.itmc.controllers;
 
 import com.blog.itmc.models.Media;
 import com.blog.itmc.services.MediaService;
