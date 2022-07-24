@@ -1,5 +1,7 @@
 package com.blog.itmc.services;
 
+import com.blog.itmc.apis.APIResponse;
+import com.blog.itmc.apis.DataRequestLogin;
 import com.blog.itmc.exceptions.ResourceNotFoundException;
 import com.blog.itmc.models.Account;
 import com.blog.itmc.models.Member;
@@ -26,41 +28,75 @@ public class AccountService {
         return accountRepo.findAll();
     }
 
-    public Account getById(String id) throws ResourceNotFoundException, IllegalArgumentException  {
-        Account accFound = accountRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Tài khoản: " + id));
-        return accFound;
-    }
+//    public Account getById(String id) throws ResourceNotFoundException, IllegalArgumentException  {
+//        Account accFound = accountRepo.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Tài khoản: " + id));
+//        return accFound;
+//    }
 
-    public Account login(Account account) {
+    public APIResponse login(DataRequestLogin account) {
+        APIResponse response = new APIResponse(false, "Đăng nhập không thành công", null);
         String username = account.getUsername();
         String password = account.getPassword();
-        Account accFound = this.getById(username);
-        if (!accFound.getPassword().equals(password))
-            throw new IllegalArgumentException("Sai thông tin đăng nhập!");
-        return accFound;
-    }
-
-    public Account register(Account account) {
-        String memId = account.getMemId();
-        Member memFound = memberRepo.findById(memId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy member id: " + memId));
-        Optional<Account> accFound = accountRepo.findById(account.getUsername());
-        if (accFound.isPresent())
-            throw new IllegalArgumentException("Tên tài khoản này đã có sử dụng!");
-        Role role = roleRepo.findByName("Blogger").get();
-        account.setRoleId(role.getId());
-        return accountRepo.save(account);
-    }
-
-    public Account update(Account account) {
-        String username = account.getUsername();
-        Account accFound = this.getById(username);
-        accFound.setPassword(account.getPassword() != null ? account.getPassword() : accFound.getPassword());
-        if (account.getRoleId() != 0) {
-            int roleId = account.getRoleId();
-            Role role = roleRepo.findById(roleId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy role!"));
-            accFound.setRoleId(roleId);
+        if (username.isEmpty() || password.isEmpty()) {
+            response.setMessage("Tài khoản hoặc mật khẩu không được trống");
+            return response;
         }
-        return accountRepo.save(accFound);
+        // không có tài khoản
+        Optional<Account> accFound = accountRepo.findById(username);
+        if (accFound.isEmpty() || !accFound.get().getPassword().equals(password)) {
+            response.setMessage("Sai thông tin đăng nhập");
+            return response;
+        }
+        response.setStatus(true);
+        response.setMessage("Đăng nhập thành công");
+        response.setData(accFound.get());
+        return response;
+    }
+
+    public APIResponse register(Account account) {
+        APIResponse response = new APIResponse(false, "Tạo tài khoản thất bại", null);
+        String memId = account.getMemId();
+        Optional<Member> memFound = memberRepo.findById(memId);
+        if (memFound.isPresent()) {
+            response.setMessage("Mã sinh viên đã tồn tại");
+            return response;
+        }
+        Optional<Account> accFound = accountRepo.findById(account.getUsername());
+        if (accFound.isPresent()) {
+            response.setMessage("Tên tài khoản này đã tồn tại");
+            return response;
+        }
+        if (account.getPassword().isEmpty()) {
+            response.setMessage("Mật khẩu không được trống");
+            return response;
+        }
+        Optional<Role> roleFound = roleRepo.findById(account.getRoleId());
+        if (roleFound.isEmpty()) {
+            response.setMessage("Không tồn tại mã vai trò");
+            return response;
+        }
+        Account _account = accountRepo.save(account);
+        if(!_account.equals(account)) {
+            return response;
+        }
+        response.setStatus(true);
+        response.setMessage("Tạo tài khoản thành công");
+        response.setData(_account);
+        return response;
+    }
+
+    public APIResponse update(Account account) {
+        APIResponse response = new APIResponse(false, "Cập nhật thông tin tài khoản thất bại", null);
+        Optional<Account> accFound = accountRepo.findById(account.getUsername());
+        if (accFound.isEmpty()) {
+            response.setMessage("Tài khoản không tồn tại");
+            return response;
+        }
+        Account _account = accFound.get();
+        _account.setPassword(account.getPassword() == null ? _account.getPassword() : account.getPassword());
+
+        _account.setMemId(account.getMemId() == null ? _account.getMemId() : account.getMemId());
+        return response;
     }
 }
