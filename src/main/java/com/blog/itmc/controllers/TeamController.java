@@ -10,7 +10,7 @@ import org.springframework.http.*;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.blog.itmc.models.APIResponse;
+import com.blog.itmc.apis.APIResponse;
 import com.blog.itmc.models.MemTeam;
 import com.blog.itmc.models.Member;
 import com.blog.itmc.models.Team;

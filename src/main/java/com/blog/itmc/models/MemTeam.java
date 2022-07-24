@@ -15,7 +15,23 @@ import javax.persistence.IdClass;
 @IdClass(MemTeamId.class)
 public class MemTeam {
     @Id
-    private String studentId;   // FK: Id of class Member
+    private int memberId;   // FK: Id of class Member
     @Id
     private String teamId;    // FK: team Id
+	
+    
+	public int getMemberId() {
+		return memberId;
+	}
+	public void setMemberId(int memberId) {
+		this.memberId = memberId;
+	}
+	public String getTeamId() {
+		return teamId;
+	}
+	public void setTeamId(String teamId) {
+		this.teamId = teamId;
+	}
+    
+    
 }
