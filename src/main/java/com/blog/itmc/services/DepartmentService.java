@@ -28,74 +28,67 @@ import java.util.Optional;
 public class DepartmentService {
     @Autowired
     DepartmentRepo repository;
-    
+
     @Autowired
     MemDepartRepo memDepartRepo;
-    
+
     @Autowired
     MemberRepo memberRepo;
-    
+
     @Autowired
     MemTeamRepo memTeamRepo;
-    
+
 
     public APIResponse findAll() {
-    	APIResponse allTeam = new APIResponse();
-    	allTeam.setStatus(true);
-    	allTeam.setMessage("Lấy dữ liệu thành công ");
-    	allTeam.setData(repository.findAll());
-        return allTeam; 
-    }
-    
-    public APIResponse createDepart(Department depart) {
-    	 Optional<Department> t2 = repository.findById(depart.getName()) ;
-         APIResponse newDepart = new APIResponse();
-         if (t2 == null) {
-      	   	newDepart.setStatus(true);
-         	newDepart.setMessage("");
-         	newDepart.setData(depart);
-             repository.save(depart);
-         }else {
-      		newDepart.setStatus(false);
-         	newDepart.setMessage("Ban đã tồn tại");
-         	newDepart.setData(depart);
-         }
-         return newDepart ;
+        return new APIResponse(true, "Lấy dữ liệu thành công", repository.findAll());
     }
 
-    public APIResponse getById(String id)  {
-        Department depart = repository.findById(id)
-                .orElse(null);
-        APIResponse data = new APIResponse();
-        if (depart == null) {
-     	   	data.setStatus(false);
-        	data.setMessage("Team không tồn tại");
-        	data.setData(depart);
-        }else {
-     		data.setStatus(true);
-        	data.setMessage("");
-        	data.setData(depart);
+    public APIResponse createDepart(Department newDepart) {
+        Optional<Department> departFound = repository.findById(newDepart.getName());
+        APIResponse response = new APIResponse(true, "Ban đã tạo thành công", null);
+        if (departFound.isEmpty()) {
+            newDepart = repository.save(newDepart);
+            response.setData(newDepart);
+            return response;
         }
-        return data;
+        response.setStatus(false);
+        response.setMessage("Ban đã tồn tại");
+        response.setData(null);
+        return response;
     }
-    
+
+    public APIResponse getById(String id) {
+        Optional<Department> depart = repository.findById(id);
+        APIResponse response = new APIResponse(false, "Ban không tồn tại", null);
+        if (depart.isEmpty()) {
+            return response;
+        }
+        response.setStatus(true);
+        response.setMessage("Lấy dữ liệu thành công");
+        response.setData(depart);
+        return response;
+    }
+
     public APIResponse updateDepart(Department depart) {
-    	Optional<Department> d = repository.findById(depart.getName()) ;
-        APIResponse data = new APIResponse();
-        if (d == null) {
-        	data.setStatus(false);
-       		data.setMessage("Ban không tồn tại");
-       		data.setData(depart);
-        }else {
-        	data.setStatus(true);
-    		data.setMessage("");
-    		data.setData(depart);
-        	repository.save(depart);
+        Optional<Department> departFound = repository.findById(depart.getName());
+        APIResponse response = new APIResponse(false, "Ban không tồn tại", null);
+        if (departFound.isEmpty()) {
+            return response;
         }
-        return data ;
+        Department oldDepart = departFound.get();
+
+        Department newDepart = new Department(depart.getName(), null, null, oldDepart.getMemDepart());
+        newDepart.setIcon(depart.getIcon() == null ? oldDepart.getIcon() : depart.getIcon());
+        newDepart.setDescription(depart.getDescription() == null ? oldDepart.getDescription() : depart.getDescription());
+
+        newDepart = repository.save(newDepart);
+        response.setStatus(true);
+        response.setMessage("");
+        response.setData(newDepart);
+        return response;
     }
-    
-    
+
+
 //    public APIResponse deleteDepart(String departId)  {
 //    	Department t2 = repository.findById(departId)
 //                .orElse(null);
@@ -113,72 +106,70 @@ public class DepartmentService {
 //         }
 //         return data ;
 //    }
-    
 
 
-    public APIResponse addMemDepart(MemDepart mem) throws ResourceNotFoundException, IllegalArgumentException{
-        
-    	 MemDepartId id  = new MemDepartId();
-         id.setMemberId(mem.getMemberId());
-         id.setDepartId(mem.getDepartId());
-         Optional<MemDepart> l = memDepartRepo.findById(id);
-         
-         APIResponse data = new APIResponse();
-         if (l == null) {
-          	data.setStatus(true);
-         	data.setMessage("");
-         	data.setData(mem);
-         	memDepartRepo.save(mem);
-          }else {
-          	data.setStatus(false);
-      		data.setMessage("Thêm mới thất bại do sinh viên đã thuộc ban");
-      		data.setData(null);
-          }  
-         return data ;
-     }
-    
-    public APIResponse updateMemDepart(MemDepart mem) throws ResourceNotFoundException, IllegalArgumentException{
-        
-    	MemDepartId id  = new MemDepartId();
+    public APIResponse addMemDepart(MemDepart mem) {
+
+        MemDepartId id = new MemDepartId();
         id.setMemberId(mem.getMemberId());
         id.setDepartId(mem.getDepartId());
         Optional<MemDepart> l = memDepartRepo.findById(id);
-        
+
+        APIResponse response = new APIResponse(true, "Thêm thành công", null);
+        if (l.isPresent()) {
+            memDepartRepo.save(mem);
+            response.setData(mem);
+            return response;
+        } else {
+            response.setStatus(false);
+            response.setMessage("Thêm mới thất bại do sinh viên đã thuộc ban");
+            response.setData(null);
+        }
+        return response;
+    }
+
+    public APIResponse updateMemDepart(MemDepart mem) throws ResourceNotFoundException, IllegalArgumentException {
+
+        MemDepartId id = new MemDepartId();
+        id.setMemberId(mem.getMemberId());
+        id.setDepartId(mem.getDepartId());
+        Optional<MemDepart> l = memDepartRepo.findById(id);
+
         APIResponse data = new APIResponse();
         if (l != null) {
-         	data.setStatus(true);
-        	data.setMessage("");
-        	data.setData(mem);
-        	memDepartRepo.save(mem);
-         }else {
-         	data.setStatus(false);
-     		data.setMessage("Cập nhật thất bại do sinh viên chưa thuộc team nào");
-     		data.setData(null);
-         }  
-        return data ;
-     }
-    
-    public APIResponse deteleMemDepart(String departId, int memId){
-        
-    	MemDepartId id  = new MemDepartId();
+            data.setStatus(true);
+            data.setMessage("");
+            data.setData(mem);
+            memDepartRepo.save(mem);
+        } else {
+            data.setStatus(false);
+            data.setMessage("Cập nhật thất bại do sinh viên chưa thuộc team nào");
+            data.setData(null);
+        }
+        return data;
+    }
+
+    public APIResponse deteleMemDepart(String departId, int memId) {
+
+        MemDepartId id = new MemDepartId();
         id.setMemberId(memId);
         id.setDepartId(departId);
         Optional<MemDepart> l = memDepartRepo.findById(id);
-        
+
         APIResponse data = new APIResponse();
         if (l != null) {
-         	data.setStatus(true);
-         	data.setMessage("");
-         	data.setData(id);
-         	memDepartRepo.deleteById(id);
-         	memDepartRepo.deleteByMemId(memId);
-        }else {
-         	data.setStatus(false);
-     		data.setMessage("sinh viên chưa thuộc team này");
-     		data.setData(null);
-         }  
-        return data ;
-      } 
-	  
-    
+            data.setStatus(true);
+            data.setMessage("");
+            data.setData(id);
+            memDepartRepo.deleteById(id);
+            memDepartRepo.deleteByMemId(memId);
+        } else {
+            data.setStatus(false);
+            data.setMessage("sinh viên chưa thuộc team này");
+            data.setData(null);
+        }
+        return data;
+    }
+
+
 }
