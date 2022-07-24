@@ -11,7 +11,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemTeamId implements Serializable {
-    private String studentId;   // FK: Id of class Member
+    private int memberId;   // FK: Id of class Member
     private String teamId;    // FK: depart Id
 
     @Override
@@ -20,10 +20,24 @@ public class MemTeamId implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         MemTeamId memTeamId = (MemTeamId) o;
         return teamId.equals(memTeamId.getTeamId()) &&
-                studentId.equals(memTeamId.getStudentId());
+                memberId ==memTeamId.getMemberId();
     }
     @Override
     public int hashCode() {
-        return Objects.hash(studentId, teamId);
+        return Objects.hash(memberId, teamId);
     }
+	
+	public int getMemberId() {
+		return memberId;
+	}
+	public void setMemberId(int memberId) {
+		this.memberId = memberId;
+	}
+	public String getTeamId() {
+		return teamId;
+	}
+	public void setTeamId(String teamId) {
+		this.teamId = teamId;
+	}
+    
 }
