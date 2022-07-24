@@ -43,7 +43,7 @@ public class AccountService {
             return response;
         }
         // không có tài khoản
-        Optional<Account> accFound = accountRepo.findById(username);
+        Optional<Account> accFound = accountRepo.findByUsername(username);
         if (accFound.isEmpty() || !accFound.get().getPassword().equals(password)) {
             response.setMessage("Sai thông tin đăng nhập");
             return response;
@@ -56,13 +56,13 @@ public class AccountService {
 
     public APIResponse register(Account account) {
         APIResponse response = new APIResponse(false, "Tạo tài khoản thất bại", null);
-        String memId = account.getMemId();
+        int memId = account.getMemId();
         Optional<Member> memFound = memberRepo.findById(memId);
         if (memFound.isPresent()) {
             response.setMessage("Mã sinh viên đã tồn tại");
             return response;
         }
-        Optional<Account> accFound = accountRepo.findById(account.getUsername());
+        Optional<Account> accFound = accountRepo.findByUsername(account.getUsername());
         if (accFound.isPresent()) {
             response.setMessage("Tên tài khoản này đã tồn tại");
             return response;
@@ -86,17 +86,22 @@ public class AccountService {
         return response;
     }
 
-    public APIResponse update(Account account) {
+    public APIResponse update(int id, Account account) {
         APIResponse response = new APIResponse(false, "Cập nhật thông tin tài khoản thất bại", null);
-        Optional<Account> accFound = accountRepo.findById(account.getUsername());
+        Optional<Account> accFound = accountRepo.findById(id);
         if (accFound.isEmpty()) {
             response.setMessage("Tài khoản không tồn tại");
             return response;
         }
         Account _account = accFound.get();
+        _account.setUsername(account.getUsername() == null ? _account.getUsername() : account.getUsername());
         _account.setPassword(account.getPassword() == null ? _account.getPassword() : account.getPassword());
+        _account.setMemId(account.getMemId() == 0 ? _account.getMemId() : account.getMemId());
 
-        _account.setMemId(account.getMemId() == null ? _account.getMemId() : account.getMemId());
+        _account = accountRepo.save(_account);
+        response.setStatus(true);
+        response.setMessage("Cập nhật tài khoản thành công");
+        response.setData(_account);
         return response;
     }
 }
