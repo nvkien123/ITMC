@@ -27,17 +27,5 @@ public class MemDepartId  implements Serializable {
         return Objects.hash(memberId, departId);
     }
 	
-	public int getMemberId() {
-		return memberId;
-	}
-	public void setMemberId(int memberId) {
-		this.memberId = memberId;
-	}
-	public String getDepartId() {
-		return departId;
-	}
-	public void setDepartId(String departId) {
-		this.departId = departId;
-	}
     
 }

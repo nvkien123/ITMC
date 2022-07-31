@@ -40,121 +40,105 @@ public class MemberService {
     MemDepartRepo memDepartRepo;
 
     public APIResponse findAll() {
-    	APIResponse allMember = new APIResponse();
-    	allMember.setStatus(true);
-    	allMember.setMessage("Lấy dữ liệu thành công ");
-    	allMember.setData(repository.findAll());
-        return allMember;
+    	return new APIResponse(true,"Lấy dữ liệu thành công ",repository.findAll());
     }
     
-    public APIResponse createMember(Member member) throws ResourceNotFoundException, IllegalArgumentException{
-       
-       APIResponse newMember = new APIResponse();
-       Optional<Member> m = repository.findById(member.getId());
-    
-       if (m == null)
-           	repository.save(member);
-       else {
-           	newMember.setStatus(false);
-           	newMember.setMessage("Mã sinh viên đã tồn tại");
-           	newMember.setData(null);
-       }
-       return newMember ;
+    public APIResponse createMember(Member newMember){
+    	Optional<Member> memberFound = repository.findById(newMember.getId());
+    	APIResponse response = new APIResponse(true,"Thêm sinh viên thành công",null);
+    	if (memberFound.isEmpty()) {
+           	newMember = repository.save(newMember);
+           	response.setData(newMember);
+           	return response ;
+    	}
+    	response.setStatus(false);
+    	response.setMessage("Mã sinh viên đã tồn tại");   
+        return response ;
     }
     
-    public APIResponse getById(int id) throws ResourceNotFoundException, IllegalArgumentException  {
-    	
-    	APIResponse getMember = new APIResponse();
-        Member member = repository.findById(id)
-                .orElse(null);
-        if (member == null ) {
-        	getMember.setStatus(false);
-        	getMember.setMessage("id không tồn tại");
-        	getMember.setData(null);
+    public APIResponse getById(int memberId)  {	
+        Optional<Member> memberFound = repository.findById(memberId);
+        APIResponse response = new APIResponse(false,"Mã sinh viên không tồn tại",null);
+        if (memberFound.isEmpty()) {
+        	return response ;
         }
-        else {
-        	getMember.setStatus(true);
-        	getMember.setMessage("");
-        	getMember.setData(member);
-        }
-        return getMember;
+    	response.setStatus(true);
+    	response.setMessage("Lấy dữ liệu thành công");
+    	response.setData(memberFound);
+        return response;
     }
+    
     public APIResponse updateMember(Member member)  {
-    	
-    	APIResponse getMember = new APIResponse();
-        Member m = repository.findById(member.getId())
-                .orElse(null);
-        
-        if (m == null ) {
-        	getMember.setStatus(false);
-        	getMember.setMessage("id không tồn tại");
-        	getMember.setData(null);
+        Optional<Member> memberFound = repository.findById(member.getId());
+        APIResponse response = new APIResponse(false ,"Sinh viên không tồn tại",null);
+        if (memberFound.isEmpty()) {
+            return response;
         }
-        else {
-        	getMember.setStatus(true);
-        	getMember.setMessage("");
-        	getMember.setData(member);
-        	repository.save(member);
-        }
-        return getMember;
+        Member oldMember = memberFound.get();
+        Member newMember = new Member(member.getId(), "", "","",0);
+        newMember.setStudentId(member.getStudentId() == null ? oldMember.getStudentId() : member.getStudentId());
+        newMember.setFullName(member.getFullName() == null ? oldMember.getFullName() : member.getFullName());           
+        newMember.setPhone(member.getPhone() == null ? oldMember.getPhone() : member.getPhone());
+        newMember.setPositionId(member.getPositionId() == 0 ? oldMember.getPositionId() : member.getPositionId());
+        newMember = repository.save(newMember);
+    	response.setStatus(true);
+    	response.setMessage("Cập nhật thành công");
+        response.setData(newMember);           
+        return response ;
     }
     
-    public APIResponse deleteMember(int id)  {
-        Member m = repository.findById(id)
-                .orElseThrow(null);
-        APIResponse getMember = new APIResponse();
-        if (m == null ) {
-        	getMember.setStatus(false);
-        	getMember.setMessage("id không tồn tại");
-        	getMember.setData(null);
-        }
-        else {
-        	getMember.setStatus(true);
-        	getMember.setMessage("");
-        	getMember.setData(m);
-        	repository.save(m);
-        	memTeamRepo.deleteByMemId(m.getId());
-            memDepartRepo.deleteByMemId(m.getId());
-            repository.deleteById(m.getId());
-        }
-        return getMember;
+    public APIResponse deleteMember(int memberId)  {
+        Optional<Member> memberFound = repository.findById(memberId);
+        APIResponse response = new APIResponse(false,"Sinh viên không tồn tại",null);
+        if (memberFound.isEmpty()) {
+            return response;
+        } 
+        memTeamRepo.deleteByMemId(memberId);
+        memDepartRepo.deleteByMemId(memberId);
+        repository.deleteById(memberId);
+        response.setStatus(true);
+        response.setMessage("Xóa sinh viên thành công");
+        response.setData(memberId);
+        return response;
     }
     
+    ///// 
     
-    /////
-    
-    public APIResponse getAllMemTeamByTeamId(String teamId) {
-    	Team team = TeamRepo.findById(teamId)
-                .orElse(null);
-    	List<MemTeam> l = (List) team.getMemTeam() ;
-    	List<Member> myList = new ArrayList<Member>();
-    	for(MemTeam x : l) {
-    		Optional<Member> member = repository.findById(x.getMemberId()) ;
-    		myList.add(member.get());
+    public APIResponse getMemTeamByTeamId(String teamId) {
+    	Optional<Team> teamFound = TeamRepo.findById(teamId);
+    	APIResponse response = new APIResponse(false,"Team không tồn tại",null);
+    	if (teamFound.isEmpty()) {
+    		return response ;
     	}
-    	APIResponse data = new APIResponse();
-        data.setStatus(true);
-       	data.setMessage("");
-       	data.setData(myList);
-    	
-    	
-    	return data ;
+    	List<MemTeam> memTeams = (List) teamFound.get().getMemTeam() ;
+    	List<Member> members = new ArrayList<Member>();
+    	for(MemTeam memTeam : memTeams) {
+    		Optional<Member> member = repository.findById(memTeam.getMemberId()) ;
+    		if (member.isEmpty() == false)
+    			members.add(member.get());
+    	}
+        response.setStatus(true);
+       	response.setMessage("Lấy dữ liệu thành công");
+       	response.setData(members);
+    	return response ;
     }
     
-    public APIResponse getMemDepartById(String nameDepart) {
-    	Department MemDepart = departRepo.findById(nameDepart)
-    			 .orElse(null);
-    	List<MemDepart> l = (List) MemDepart.getMemDepart() ;
-    	List<Member> myList = new ArrayList<Member>();
-    	for(MemDepart x : l) {
-    		Optional<Member> member = repository.findById(x.getMemberId()) ;
-    		myList.add(member.get());
+    public APIResponse getMemDepartByDepartId(String departId) {
+    	Optional<Department> departFound = departRepo.findById(departId);
+    	APIResponse response = new APIResponse(false,"Ban không tồn tại",null);
+		if (departFound.isEmpty()) {
+    		return response ;
     	}
-    	
-    	APIResponse data = new APIResponse();
-        data.setStatus(true);
-       	data.setMessage("");
-       	data.setData(myList);
-    	return data ;
+    	List<MemDepart> memDeparts = (List) departFound.get().getMemDepart() ;
+    	List<Member> members = new ArrayList<Member>();
+    	for(MemDepart memDepart : memDeparts) {
+    		Optional<Member> member = repository.findById(memDepart.getMemberId()) ;
+    		if (member.isEmpty() == false)
+    			members.add(member.get());
+    	}
+    	response.setStatus(true);
+       	response.setMessage("Lấy dữ liệu thành công");
+       	response.setData(members);
+    	return response ;
     }
 }

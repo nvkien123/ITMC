@@ -23,38 +23,9 @@ public class Department {
     
     @OneToMany(mappedBy = "departId", cascade = CascadeType.ALL)
     private Collection<MemDepart> memDepart;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getIcon() {
-		return icon;
-	}
-
-	public void setIcon(String icon) {
-		this.icon = icon;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public Collection<MemDepart> getMemDepart() {
-		return memDepart;
-	}
-
-	public void setMemDepart(Collection<MemDepart> memDepart) {
-		this.memDepart = memDepart;
-	}
+    
+    @OneToMany(mappedBy = "depart", cascade = CascadeType.ALL)
+    private Collection<Team> teams;
     
     
 }

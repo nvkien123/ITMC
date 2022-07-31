@@ -15,26 +15,21 @@ import com.blog.itmc.apis.APIResponse;
 import com.blog.itmc.services.MemberService;
 
 @RestController
-@RequestMapping("/api/members")
+@RequestMapping("/api/member")
 public class MemberController {
 
     @Autowired
     private MemberService service;
-    
 
     @GetMapping("")
-    public APIResponse findAll(@RequestParam Map<String, String> param) {
-    	
+    public APIResponse findAll(@RequestParam Map<String, String> param) {   	
     	String teamName = param.getOrDefault("team", "");
     	String departName = param.getOrDefault("depart", "");
-    	if(departName.length() == 0 && teamName.length() == 0) {
+    	if(departName.length() == 0 && teamName.length() == 0)
     		return service.findAll(); 		
-    	} else if (teamName.length() > 0) {
-    		return service.getAllMemTeamByTeamId(teamName);
-    	}
-    	
-    	return service.getAllMemTeamByTeamId(departName);
-    	
+    	if (teamName.length() > 0)
+    		return service.getMemTeamByTeamId(teamName);
+    	return service.getMemDepartByDepartId(departName);
 	}
     
     @PostMapping("")
@@ -55,8 +50,6 @@ public class MemberController {
     @DeleteMapping("/{id}")
     public APIResponse deleteMember(@PathVariable(name = "id") int id) {
         return service.deleteMember(id);
-    }
-    
-    
+    }  
    
  }

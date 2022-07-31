@@ -44,11 +44,10 @@ public class DepartmentController {
         return service.updateDepart(Department);
     }
     
-//    @DeleteMapping("")
-//    public APIResponse deletedepart(@Valid @RequestBody String teamId) {
-//    	return service.deleteDepart(teamId);
-//    }
-
+    @DeleteMapping("/{id}")
+    public APIResponse deletedepart(@PathVariable(name = "id") String departId) {
+    	return service.deleteDepart(departId);
+    }
     
     ////
      
@@ -64,8 +63,8 @@ public class DepartmentController {
     
     @DeleteMapping("/member")
     public APIResponse deleteMemDepart(@RequestParam Map<String, String> param) {
-    	String departId = param.getOrDefault("q", "");
-    	String memId = param.getOrDefault("a", "");
+    	String departId = param.getOrDefault("depart-id", "");
+    	String memId = param.getOrDefault("member-id", "");
     	return service.deteleMemDepart(departId,Integer.parseInt(memId));
     }
  }

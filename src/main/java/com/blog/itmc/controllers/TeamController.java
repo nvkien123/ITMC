@@ -25,8 +25,11 @@ public class TeamController {
     private TeamService service;
 
     @GetMapping("")
-    public APIResponse findAll() {
-        return service.findAll();
+    public APIResponse findAll(@RequestParam Map<String, String> param) {
+    	String departId = param.getOrDefault("depart", "");
+    	if (departId.length() ==0 )
+    		return service.findAll();
+    	return service.getTeamByDepartId(departId);
     }
     
     @PostMapping("")
@@ -39,19 +42,17 @@ public class TeamController {
     	return service.updateTeam(team);
     }
     
-    @DeleteMapping("")
-    public APIResponse deleteTeam(@Valid @RequestBody String teamId) {
+    @DeleteMapping("/{id}")
+    public APIResponse deleteTeam(@PathVariable(name = "id") String teamId) {
     	return service.deleteTeam(teamId);
     }
     
     @GetMapping("/{id}")
     public APIResponse getTeamById(@PathVariable(name = "id") String id) {
     	return service.getById(id);
-    }
+    }  
     
-    
-    ////
-
+    //// member
      
     @PostMapping("/member")
     public APIResponse createMemTeam(@Valid @RequestBody MemTeam MemTeam) {

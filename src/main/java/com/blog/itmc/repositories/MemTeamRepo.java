@@ -15,14 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface MemTeamRepo extends JpaRepository<MemTeam, MemTeamId> {
 	
-//	@Query("select u from MemTeam u where u.memberId = ?1 AND u.teamId = ?2")
-//    MemTeam findByStudentIdAndTeamId(String studentId , String TeamId);
-//	
-//	@Transactional
-//	@Modifying
-//	@Query("delete from MemTeam u where u.studentId = ?1 AND u.teamId = ?2")
-//    void deleteByStudentIdAndTeamId(String studentId , String TeamId);
-	
 	@Transactional
 	@Modifying
 	@Query("delete from MemTeam u where u.memberId = ?1 ")
@@ -30,6 +22,6 @@ public interface MemTeamRepo extends JpaRepository<MemTeam, MemTeamId> {
 	
 	@Transactional
 	@Modifying
-	@Query("delete from MemDepart u where u.teamId = ?1")
+	@Query("delete from MemTeam u where u.teamId = ?1")
     void deleteByTeamId(String teamId);
 }

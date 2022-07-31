@@ -27,17 +27,5 @@ public class MemTeamId implements Serializable {
         return Objects.hash(memberId, teamId);
     }
 	
-	public int getMemberId() {
-		return memberId;
-	}
-	public void setMemberId(int memberId) {
-		this.memberId = memberId;
-	}
-	public String getTeamId() {
-		return teamId;
-	}
-	public void setTeamId(String teamId) {
-		this.teamId = teamId;
-	}
     
 }
