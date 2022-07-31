@@ -30,7 +30,7 @@ public class TeamController {
     }
     
     @PostMapping("")
-    public APIResponse createteam(@Valid @RequestBody Team team) {
+    public APIResponse createTeam(@Valid @RequestBody Team team) {
         return service.createTeam(team);
     }
     

@@ -27,9 +27,8 @@ public class AccountController {
     public APIResponse login(@RequestBody DataRequestLogin account) {
         return accountService.login(account);
     }
-    @PutMapping("/update")
-    public APIResponse update(@RequestBody Account account) {
-
-        return null;
+    @PutMapping("/update/{id}")
+    public APIResponse update(@PathVariable("id") int id, @RequestBody Account account) {
+        return accountService.update(id, account);
     }
 }
