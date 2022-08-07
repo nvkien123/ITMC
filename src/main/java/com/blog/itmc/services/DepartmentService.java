@@ -73,6 +73,7 @@ public class DepartmentService {
         response.setStatus(true);
         response.setMessage("Lấy dữ liệu thành công");
         response.setData(departFound.get());
+
         return response;
     }
 
@@ -83,12 +84,14 @@ public class DepartmentService {
             return response;
         }
         Department oldDepart = departFound.get();
+
         Department newDepart = new Department(depart.getName(), null, null, oldDepart.getMemDepart());
         newDepart.setIcon(depart.getIcon() == null ? oldDepart.getIcon() : depart.getIcon());
         newDepart.setDescription(depart.getDescription() == null ? oldDepart.getDescription() : depart.getDescription());
 
         newDepart = repository.save(newDepart);
         newDepart.setMemDepart(null);
+        
         response.setStatus(true);
         response.setMessage("Cập nhật thành công ");
         response.setData(newDepart);
@@ -161,6 +164,5 @@ public class DepartmentService {
     	response.setMessage("sinh viên chưa thuộc ban này");
         return response;
     }
-
 
 }
